@@ -1,0 +1,67 @@
+services:
+  db:
+    image: "mysql:latest"
+    # Suppress some useless error messages with cap_add set to SYS_NICE.
+    cap_add:
+      - SYS_NICE
+    # Make docker-compose always restart this container if it fails.
+    restart: always
+    
+    # "postgres:${POSTGRES_VERSION}"
+    environment:
+      #- MYSQL_ROOT_PASSWORD=kimKim!1
+      - db_user:${DB_USER}
+      - db_password:${DB_PASSWORD}
+      - db_database:${DB_DATABASE}
+    ports:
+      # <Port exposed> : < MySQL Port running inside container>, e.g., - 3000:3000
+      - 48012:3306
+    expose:
+      # Open this port on the container.
+      - '3306'
+    volumes:
+      # Where our data is persisted.
+      - db:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  task_manager:
+    build: .
+    image: "rails7_todo_container"
+    depends_on:
+      - db
+    ports:
+      # - "3000:3000"
+      - "48013:3000"
+    environment:
+      # - MYSQLCONNECTOR_SOMETHING=mysql://db:5432
+      - DB_HOST=db
+      - db_user:${DB_USER}
+      - db_password:${DB_PASSWORD}
+      - db_database:${DB_DATABASE}
+    links:
+      - db
+    volumes:
+      - ./:/src
+
+  # web:
+  #   build: .
+  #   command: bundle exec rails s -p 3000 -b '0.0.0.0'
+  #   volumes:
+  #     - .:/next-reg
+  #   volumes_from:
+  #     - gem_files
+  #   ports:
+  #     - "3000:3000"
+  #     - "8000:8000"
+  #   links:
+  #     - db
+  #   env_file:
+  #     - .myenv.env
+
+# Name our volume
+# e.g. Adds 2 volumes. 1 is the DB volume, mapped to the below volumes db which
+# tells Docker & docker-compose to manage the volume for us. Next, add an
+# init.sql script which initializes our database with the given SQL file.
+volumes:
+  db:
+    driver: local
