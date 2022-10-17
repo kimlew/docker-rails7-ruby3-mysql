@@ -1,3 +1,5 @@
 .env
 junk
 Dockerfile.rails
+*_results.txt
+.vscode/
