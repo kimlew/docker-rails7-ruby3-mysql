@@ -6,14 +6,31 @@
 # Ensure the MySQL gem is defined in your Gemfile
 #   gem 'mysql2'
 #
-# And be sure to use new-style password hashing:
+# Use new-style password hashing:
 #   https://dev.mysql.com/doc/refman/5.7/en/password-hashing.html
 #
 default: &default
   adapter: mysql2
   encoding: utf8
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  socket: /tmp/mysqld.sock
+
+  # Within <% %> is Ruby code & is erb interpolation that Rails understands.
+  # socket: /tmp/mysqld.sock # Is a Unix Domain Socket where db is running in SAME container.
+  # host: [mysql_ip] - how to talk to a database on another container/machine over TCP/IP.
+  # host: 127.0.0.1
+  # port: 3306
+  #host: <%= ENV['DATABASE_HOST'] %>
+  #host: <%= ENV['DATABASE_URL'] %>
+  # external_database:
+  #   url: <%= ENV['EXTERNAL_DB_URL'] %> # Add env variables 'DATABASE_URL' & a different 'EXTERNAL_DB_URL'
+  host: db
+  port: <%= ENV['PORT_MYSQL'] %>
+  # You need host & port OR socket. socket: <%= ENV['SOCKET'] %>
+  database: <%= ENV['[MYSQL_DATABASE'] %>
+  # username: <%= ENV['MYSQL_ROOT_USER'] %>
+  # password: <%= ENV['MYSQL_ROOT_PASSWORD'] %>
+  username: <%= ENV['MYSQL_USER'] %>
+  password: <%= ENV['MYSQL_PASSWORD'] %>
 
 # These are environment names.
 development:
